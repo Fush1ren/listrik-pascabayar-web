@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: app/_components/admin/EditAdmin.jsx</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: app/_components/admin/EditAdmin.jsx</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>'use client'
+
+import { redirect } from "next/navigation";
+import { getApiRes } from "@/utils/api_lib";
+import { useEffect, useState } from "react"
+
+/**
+ * Komponen EditAdmin untuk mengedit data admin.
+ *
+ * @param {Object} props - Properti yang diberikan ke komponen ini.
+ * @param {Object} props.data - Data awal admin.
+ * @param {Function} props.setModalEdit - Fungsi untuk menutup modal edit.
+ * @param {Function} props.submitEditButton - Fungsi untuk mengirim data yang telah diedit.
+ * @returns {JSX.Element} Komponen EditAdmin.
+ */
+const EditAdmin = ({ data, setModalEdit, submitEditButton }) => {
+    const [username, setUsername] = useState(data?.username);
+    const [password, setPassword] = useState(data?.password);
+    const [namaAdmin, setNamaAdmin] = useState(data?.nama_admin);
+    const [levelAdmin, setLevelAdmin] = useState([]);
+    const [selectedLevelAdmin, setSelectedLevelAdmin] = useState(data?.id_level);
+
+    /**
+     * Menghandle perubahan pada input username.
+     * 
+     * @param {Object} e - Event input.
+     */
+    const usernameHandle = (e) => {
+        setUsername(e.target.value);
+    };
+    /**
+     * Menghandle perubahan pada input password.
+     * 
+     * @param {Object} e - Event input.
+     */
+    const passwordHandle = (e) => {
+        setPassword(e.target.value);
+    };
+    /**
+     * Menghandle perubahan pada input nama admin.
+     * 
+     * @param {Object} e - Event input.
+     */
+    const namaAdminHandle = (e) => {
+        setNamaAdmin(e.target.value);
+    };
+    /**
+     * Menghandle perubahan pada input level admin.
+     * 
+     * @param {Object} e - Event input.
+     */
+    const handleLevelAdminChange = (e) => {
+        setSelectedLevelAdmin(e.target.value);
+    };
+
+    /**
+     * Mengirim data yang telah diedit.
+     */
+    const submitHandle = async () => {
+        try {
+            const value = {
+                username: username.toLowerCase(),
+                password: password,
+                nama_admin: namaAdmin,
+                id_level: parseInt(selectedLevelAdmin)
+            }
+            submitEditButton(data?.id_level, value)
+        } catch (e) {
+            console.log(e)
+        }
+    }
+
+    /**
+    * Mendapatkan data level admin dari API.
+    */
+    const getLevel = async () => {
+        try {
+            const api = await getApiRes(`/level`);
+            if (api.result.error.length > 0) return console.log(api.result.error);
+            setLevelAdmin(api?.result?.data)
+        } catch (e) {
+            console.log(e);
+        }
+    }
+
+    useEffect(() => {
+        const storage = JSON.parse(localStorage.getItem('dataUser'))
+        if (storage?.islogin === true &amp;&amp; storage?.level === 'admin') {
+            getLevel()
+        } else {
+            redirect('/login/admin')
+        }
+    }, [])
+
+
+    return (
+        &lt;div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center">
+            &lt;div className="bg-white p-6 rounded shadow-lg w-1/3">
+                &lt;h2 className="text-xl mb-4">Edit Data&lt;/h2>
+                &lt;form>
+                    &lt;div className="mb-4">
+                        &lt;label className="block text-gray-700">Username&lt;/label>
+                        &lt;input
+                            type="text"
+                            value={username}
+                            onChange={usernameHandle}
+                            className="w-full border border-gray-300 px-2 py-1 rounded"
+                        />
+                    &lt;/div>
+                    &lt;div className="mb-4">
+                        &lt;label className="block text-gray-700">Password&lt;/label>
+                        &lt;input
+                            type="password"
+                            value={password}
+                            onChange={passwordHandle}
+                            className="w-full border border-gray-300 px-2 py-1 rounded"
+                        />
+                        &lt;div className="mb-4">
+                            &lt;label className="block text-gray-700">Nama Admin&lt;/label>
+                            &lt;input
+                                type="text"
+                                value={namaAdmin}
+                                onChange={namaAdminHandle}
+                                className="w-full border border-gray-300 px-2 py-1 rounded"
+                            />
+                        &lt;/div>
+                    &lt;/div>
+                    &lt;div className="flex flex-col py-2">
+                        &lt;label>Level&lt;/label>
+                        &lt;select className="w-[200px] border border-black rounded" value={selectedLevelAdmin} required onChange={handleLevelAdminChange}>
+                            {
+                                levelAdmin?.map((item, index) => {
+                                    return (
+                                        &lt;option key={index} value={item?.id_level}>
+                                            {item?.nama_level}
+                                        &lt;/option>
+                                    )
+                                })
+                            }
+                        &lt;/select>
+                    &lt;/div>
+                    &lt;div className="flex justify-end">
+                        &lt;button
+                            type="button"
+                            onClick={() => submitHandle()}
+                            className="bg-blue-500 text-white px-4 py-2 rounded mr-2">
+                            Submit
+                        &lt;/button>
+                        &lt;button
+                            type="button"
+                            onClick={() => setModalEdit()}
+                            className="bg-gray-500 text-white px-4 py-2 rounded">
+                            Cancel
+                        &lt;/button>
+                    &lt;/div>
+                &lt;/form>
+            &lt;/div>
+        &lt;/div>
+    )
+}
+
+export default EditAdmin;</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-DashboardAdmin.html">DashboardAdmin</a></li><li><a href="module-DashboardPelanggan.html">DashboardPelanggan</a></li><li><a href="module-DataAdmin.html">DataAdmin</a></li><li><a href="module-DataPelanggan.html">DataPelanggan</a></li><li><a href="module-DataPenggunaan.html">DataPenggunaan</a></li><li><a href="module-DataTagihan.html">DataTagihan</a></li><li><a href="module-Home.html">Home</a></li><li><a href="module-KelolaPembayaran.html">KelolaPembayaran</a></li><li><a href="module-KelolaTagihan.html">KelolaTagihan</a></li><li><a href="module-LoginAdmin.html">LoginAdmin</a></li><li><a href="module-LoginPelanggan.html">LoginPelanggan</a></li><li><a href="module-RiwayatPembayaran.html">RiwayatPembayaran</a></li><li><a href="module-RootLayout.html">RootLayout</a></li><li><a href="module-addKelolaAdmin.html">addKelolaAdmin</a></li><li><a href="module-addKelolaLevel.html">addKelolaLevel</a></li><li><a href="module-addKelolaPelanggan.html">addKelolaPelanggan</a></li><li><a href="module-addKelolaPenggunaan.html">addKelolaPenggunaan</a></li><li><a href="module-addKelolaTarif.html">addKelolaTarif</a></li><li><a href="module-api_lib.html">api_lib</a></li><li><a href="module-level.html">level</a></li><li><a href="module-supabase.html">supabase</a></li><li><a href="module-tarif.html">tarif</a></li></ul><h3>Global</h3><ul><li><a href="global.html#DELETE">DELETE</a></li><li><a href="global.html#EditAdmin">EditAdmin</a></li><li><a href="global.html#EditLevel">EditLevel</a></li><li><a href="global.html#EditPelanggan">EditPelanggan</a></li><li><a href="global.html#EditPenggunaan">EditPenggunaan</a></li><li><a href="global.html#EditTagihan">EditTagihan</a></li><li><a href="global.html#EditTarif">EditTarif</a></li><li><a href="global.html#GET">GET</a></li><li><a href="global.html#PATCH">PATCH</a></li><li><a href="global.html#POST">POST</a></li><li><a href="global.html#SideBarAdmin">SideBarAdmin</a></li><li><a href="global.html#SideBarPelanggan">SideBarPelanggan</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.3</a> on Sun Jul 28 2024 15:26:32 GMT+0700 (Western Indonesia Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

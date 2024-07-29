@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: app/user/data-penggunaan/page.jsx</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: app/user/data-penggunaan/page.jsx</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @file /user/data-penggunaan/page.js
+ * @module DataPenggunaan
+ * @description Komponen untuk menampilkan Data penggunaan pelanggan.
+ */
+'use client'
+
+import { useEffect, useState } from "react"
+import { getApiRes } from "@/utils/api_lib"
+import { redirect } from "next/navigation";
+import SideBar from "@/app/_components/user/SideBar";
+
+/**
+ * Komponen DataPenggunaan.
+ * Menampilkan data penggunaan berdasarkan id_pelanggan yang tersimpan di localStorage.
+ * @returns {JSX.Element} Elemen JSX yang menampilkan halaman data penggunaan.
+ */
+const DataPenggunaan = () => {
+    /**
+     * State untuk menyimpan data penggunaan.
+     * @type {Array}
+     * @default []
+     * @description State untuk menyimpan data penggunaan.
+     */
+    const [dataPenggunaan, setDataPenggunaan] = useState([]);
+
+    /**
+     * Mengambil data penggunaan dari API berdasarkan id_pelanggan.
+     * @async
+     * @function
+     * @param {string} id_pelanggan - ID pelanggan.
+     * @returns {Promise&lt;void>}
+     */
+    const getDataPenggunaan = async (id_pelanggan) => {
+        const api = await getApiRes(`/penggunaan?id_pelanggan=${id_pelanggan}`);
+        if (api.result.error.length > 0) return console.log(api.result.error);
+        return setDataPenggunaan(api?.result?.data);
+    }
+
+    useEffect(() => {
+        const storage = JSON.parse(localStorage.getItem('dataUser'))
+        if (storage?.islogin === true &amp;&amp; storage?.level === 'pelanggan') {
+            getDataPenggunaan(storage?.data?.id_pelanggan)
+        } else {
+            redirect('/login/user')
+        }
+
+    }, [])
+
+
+    return (
+        &lt;div className="flex bg-[#F8F8F8] w-full h-screen">
+            &lt;SideBar />
+            &lt;div className="w-full text-[#6B6B6B] h-full">
+                &lt;div className="p-8 h-full overflow-auto">
+                    &lt;div className="pb-2">
+                        &lt;h1 className="text-2xl font-bold">Data Penggunaan&lt;/h1>
+                    &lt;/div>
+                    &lt;div className="">
+                        &lt;table className="w-full border-collapse py-2 overflow-auto rounded-l-full">
+                            &lt;thead>
+                                &lt;tr className="border-2 text-white">
+                                    &lt;th className="py-4 bg-[#451CB8]">No&lt;/th>
+                                    &lt;th className="py-4 bg-[#451CB8]">Bulan&lt;/th>
+                                    &lt;th className="py-4 bg-[#451CB8]">Tahun&lt;/th>
+                                    &lt;th className="py-4 bg-[#451CB8]">Meter Awal&lt;/th>
+                                    &lt;th className="py-4 bg-[#451CB8]">Meter Akhir&lt;/th>
+                                &lt;/tr>
+                            &lt;/thead>
+                            {
+                                dataPenggunaan?.length > 0 ?
+                                    &lt;tbody className="text-center">
+                                        {
+                                            dataPenggunaan?.map((item, index) => {
+                                                return (
+                                                    &lt;tr key={index} className=" odd:bg-white even:bg-[#E7E9EB]">
+                                                        &lt;td>{index + 1}&lt;/td>
+                                                        &lt;td>{item?.bulan}&lt;/td>
+                                                        &lt;td>{item?.tahun}&lt;/td>
+                                                        &lt;td>{item?.meter_awal}&lt;/td>
+                                                        &lt;td>{item?.meter_akhir}&lt;/td>
+                                                    &lt;/tr>
+                                                )
+                                            })
+                                        }
+                                    &lt;/tbody>
+                                    :
+                                    &lt;tbody>
+                                        &lt;tr>
+                                            &lt;td colSpan="5" className="text-center font-bold">Data Penggunaan Kosong&lt;/td>
+                                        &lt;/tr>
+                                    &lt;/tbody>
+                            }
+                        &lt;/table>
+                    &lt;/div>
+                &lt;/div>
+            &lt;/div>
+        &lt;/div>
+    )
+
+}
+
+export default DataPenggunaan;</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-DashboardAdmin.html">DashboardAdmin</a></li><li><a href="module-DashboardPelanggan.html">DashboardPelanggan</a></li><li><a href="module-DataAdmin.html">DataAdmin</a></li><li><a href="module-DataPelanggan.html">DataPelanggan</a></li><li><a href="module-DataPenggunaan.html">DataPenggunaan</a></li><li><a href="module-DataTagihan.html">DataTagihan</a></li><li><a href="module-Home.html">Home</a></li><li><a href="module-KelolaPembayaran.html">KelolaPembayaran</a></li><li><a href="module-KelolaTagihan.html">KelolaTagihan</a></li><li><a href="module-LoginAdmin.html">LoginAdmin</a></li><li><a href="module-LoginPelanggan.html">LoginPelanggan</a></li><li><a href="module-RiwayatPembayaran.html">RiwayatPembayaran</a></li><li><a href="module-RootLayout.html">RootLayout</a></li><li><a href="module-addKelolaAdmin.html">addKelolaAdmin</a></li><li><a href="module-addKelolaLevel.html">addKelolaLevel</a></li><li><a href="module-addKelolaPelanggan.html">addKelolaPelanggan</a></li><li><a href="module-addKelolaPenggunaan.html">addKelolaPenggunaan</a></li><li><a href="module-addKelolaTarif.html">addKelolaTarif</a></li><li><a href="module-api_lib.html">api_lib</a></li><li><a href="module-level.html">level</a></li><li><a href="module-supabase.html">supabase</a></li><li><a href="module-tarif.html">tarif</a></li></ul><h3>Global</h3><ul><li><a href="global.html#DELETE">DELETE</a></li><li><a href="global.html#EditAdmin">EditAdmin</a></li><li><a href="global.html#EditLevel">EditLevel</a></li><li><a href="global.html#EditPelanggan">EditPelanggan</a></li><li><a href="global.html#EditPenggunaan">EditPenggunaan</a></li><li><a href="global.html#EditTagihan">EditTagihan</a></li><li><a href="global.html#EditTarif">EditTarif</a></li><li><a href="global.html#GET">GET</a></li><li><a href="global.html#PATCH">PATCH</a></li><li><a href="global.html#POST">POST</a></li><li><a href="global.html#SideBarAdmin">SideBarAdmin</a></li><li><a href="global.html#SideBarPelanggan">SideBarPelanggan</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.3</a> on Sun Jul 28 2024 15:26:32 GMT+0700 (Western Indonesia Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

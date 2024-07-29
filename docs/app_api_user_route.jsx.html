@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: app/api/user/route.jsx</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: app/api/user/route.jsx</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>// Import module supabase untuk berinteraksi dengan database
+import { supabase } from "@/utils/Database";
+
+/**
+ * Fungsi untuk menangani permintaan GET dan mengembalikan data admin.
+ * @async
+ * @function GET
+ * @param {Request} Request - Objek permintaan yang diterima.
+ * @description Berfungsi untuk menangani permintaan GET dan mengambil data admin dari database Supabase dan mengembalikkan data admin tersebut dalam format JSON sebagai respon api.
+ * @returns {Promise&lt;Response>} Respons JSON dengan data admin atau pesan kesalahan.
+ */
+export async function GET(Request) {
+    try {
+        // Ambil parameter dari query string URL
+        const params = Request.nextUrl.searchParams;
+
+        let data, error;
+
+        // Jika terdapat parameter id_user, maka ambil data admin berdasarkan id_user
+        if (params.get('id_user')) {
+            // Lakukan Query ke tabel `user` dengan parameter id_user
+            const response = await supabase
+                .from('user') // Tabel user
+                .select('*, level(*)') // Select semua kolom dan relasi level
+                .eq('id_user', parseInt(params.get('id_user'))) // filter berdasarkan id_user
+                .order('id_user', {
+                    ascending: true
+                }); // Urutkan berdasarkan id_user
+
+            data = response.data;
+            error = response.error;
+        } else {
+            const response = await supabase
+                .from('user') // Tabel user
+                .select('*, level(*)') // Select semua kolom dan relasi level
+                .order('id_user', {
+                    ascending: true // Urutkan berdasarkan id_user
+                });
+
+            data = response.data; // Data admin
+            error = response.error; // Error jika terdapat error
+        }
+
+        // Jika terdapat error, maka kembalikan pesan error
+        if (error) {
+            throw new Error(error.message); // Buat error baru
+        }
+
+        // Kembalikan data admin
+        return Response.json(
+            {
+                result: {
+                    data: data, // Data admin
+                    error: '' // Tidak ada error
+                }
+            },
+            {
+                status: 200,
+                headers: {
+                    'Access-Control-Allow-Origin': '*', // Izinkan CORS
+                    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS', // Izinkan method GET, POST, PUT, DELETE, OPTIONS
+                    'Access-Control-Allow-Headers': 'Content-Type, application/json', // Izinkan header Content-Type, application/json
+                },
+            });
+    } catch (error) {
+        return Response.json(
+            {
+                result: {
+                    data: [], // Data kosong
+                    error: error.message // Pesan error
+                }
+            },
+            {
+                status: 500, // Status 500
+                headers: {
+                    'Access-Control-Allow-Origin': '*', // Izinkan CORS
+                    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS', // Izinkan method GET, POST, PUT, DELETE, OPTIONS
+                    'Access-Control-Allow-Headers': 'Content-Type, application/json', // Izinkan header Content-Type, application/json
+                },
+            });
+    }
+}
+
+
+/**
+ * Fungsi untuk menangani permintaan POST dan menambah data admin.
+ * @async
+ * @function POST
+ * @param {Request} Request - Objek permintaan yang diterima.
+ * @returns {Promise&lt;Response>} Respons JSON dengan status penambahan atau pesan kesalahan.
+ */
+export async function POST(Request) {
+    const body = await Request.json();
+
+    if (!body.username &amp;&amp; !body.password &amp;&amp; !body.nama_admin &amp;&amp; !body.id_level) {
+        return Response.json(
+            {
+                result: {
+                    data: [],
+                    error: "Data can't be empty!"
+                }
+            },
+            {
+                status: 200,
+                headers: {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+                    'Access-Control-Allow-Headers': 'Content-Type, application/json',
+                },
+            })
+    }
+
+    const { data, error } = await supabase
+        .from('user')
+        .insert({
+            username: body.username,
+            password: body.password,
+            nama_admin: body.nama_admin,
+            id_level: parseInt(body.id_level)
+        })
+
+    if (error) {
+        return Response.json(
+            {
+                result: {
+                    data: [],
+                    error: error.message
+                }
+            },
+            {
+                status: 200,
+                headers: {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+                    'Access-Control-Allow-Headers': 'Content-Type, application/json',
+                },
+            })
+    }
+    return Response.json(
+        {
+            result: {
+                data: 'Data was Successfully Created!',
+                error: ''
+            }
+        },
+        {
+            status: 200,
+            headers: {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+                'Access-Control-Allow-Headers': 'Content-Type, application/json',
+            },
+        })
+
+}
+
+/**
+ * Fungsi untuk menangani permintaan DELETE dan menghapus data admin.
+ * @param {Request} Request - Objek permintaan yang diterima.
+ * @returns {Promise&lt;Response>} - Response JSON dengan pesan sukses penghapusan data atau pesan error.
+ */
+export async function DELETE(Request) {
+    const params = Request.nextUrl.searchParams;
+
+    if (!params.get('id_user')) {
+        return Response.json(
+            {
+                result: {
+                    data: [],
+                    error: "Data can't be empty!"
+                }
+            },
+            {
+                status: 200,
+                headers: {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+                    'Access-Control-Allow-Headers': 'Content-Type, application/json',
+                },
+            })
+    }
+
+    const { data, error } = await supabase
+        .from('user')
+        .delete()
+        .eq('id_user', parseInt(params.get('id_user')))
+
+    if (error) {
+        return Response.json(
+            {
+                result: {
+                    data: [],
+                    error: error.message
+                }
+            },
+            {
+                status: 200,
+                headers: {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+                    'Access-Control-Allow-Headers': 'Content-Type, application/json',
+                },
+            })
+    }
+    return Response.json(
+        {
+            result: {
+                data: 'Data was Successfully Deleted!',
+                error: ''
+            }
+        },
+        {
+            status: 200,
+            headers: {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+                'Access-Control-Allow-Headers': 'Content-Type, application/json',
+            },
+        })
+}
+
+/**
+ * Fungsi untuk menangani permintaan PATCH (update).
+ * @param {Request} Request - Objek permintaan yang diterima.
+ * @returns {Promise&lt;Response>} - Response JSON dengan pesan pembaruan data atau pesan error.
+ */
+export async function PATCH(Request) {
+    const body = await Request.json();
+    const params = Request.nextUrl.searchParams;
+
+    if (body) {
+        const { data, error } = await supabase
+            .from('user')
+            .update(body)
+            .eq('id_user', parseInt(params.get("id_user")))
+
+        if (error) {
+            return Response.json(
+                {
+                    result: {
+                        data: [],
+                        error: error.message
+                    }
+                },
+                {
+                    status: 200,
+                    headers: {
+                        'Access-Control-Allow-Origin': '*',
+                        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS, PATCH',
+                        'Access-Control-Allow-Headers': 'Content-Type, application/json',
+                    },
+                })
+        }
+
+        return Response.json(
+            {
+                result: {
+                    data: {
+                        message: 'Data was Sucessfully Updated!'
+                    },
+                    error: ''
+                }
+            },
+            {
+                status: 200,
+                headers: {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS, PATCH',
+                    'Access-Control-Allow-Headers': 'Content-Type, application/json',
+                },
+            })
+
+    }
+    return Response.json(
+        {
+            result: {
+                data: [],
+                error: "Data can't be empty!"
+            }
+        },
+        {
+            status: 200,
+            headers: {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS, PATCH',
+                'Access-Control-Allow-Headers': 'Content-Type, application/json',
+            },
+        })
+}</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-DashboardAdmin.html">DashboardAdmin</a></li><li><a href="module-DashboardPelanggan.html">DashboardPelanggan</a></li><li><a href="module-DataAdmin.html">DataAdmin</a></li><li><a href="module-DataPelanggan.html">DataPelanggan</a></li><li><a href="module-DataPenggunaan.html">DataPenggunaan</a></li><li><a href="module-DataTagihan.html">DataTagihan</a></li><li><a href="module-Home.html">Home</a></li><li><a href="module-KelolaPembayaran.html">KelolaPembayaran</a></li><li><a href="module-KelolaTagihan.html">KelolaTagihan</a></li><li><a href="module-LoginAdmin.html">LoginAdmin</a></li><li><a href="module-LoginPelanggan.html">LoginPelanggan</a></li><li><a href="module-RiwayatPembayaran.html">RiwayatPembayaran</a></li><li><a href="module-RootLayout.html">RootLayout</a></li><li><a href="module-addKelolaAdmin.html">addKelolaAdmin</a></li><li><a href="module-addKelolaLevel.html">addKelolaLevel</a></li><li><a href="module-addKelolaPelanggan.html">addKelolaPelanggan</a></li><li><a href="module-addKelolaPenggunaan.html">addKelolaPenggunaan</a></li><li><a href="module-addKelolaTarif.html">addKelolaTarif</a></li><li><a href="module-api_lib.html">api_lib</a></li><li><a href="module-level.html">level</a></li><li><a href="module-supabase.html">supabase</a></li><li><a href="module-tarif.html">tarif</a></li></ul><h3>Global</h3><ul><li><a href="global.html#DELETE">DELETE</a></li><li><a href="global.html#EditAdmin">EditAdmin</a></li><li><a href="global.html#EditLevel">EditLevel</a></li><li><a href="global.html#EditPelanggan">EditPelanggan</a></li><li><a href="global.html#EditPenggunaan">EditPenggunaan</a></li><li><a href="global.html#EditTagihan">EditTagihan</a></li><li><a href="global.html#EditTarif">EditTarif</a></li><li><a href="global.html#GET">GET</a></li><li><a href="global.html#PATCH">PATCH</a></li><li><a href="global.html#POST">POST</a></li><li><a href="global.html#SideBarAdmin">SideBarAdmin</a></li><li><a href="global.html#SideBarPelanggan">SideBarPelanggan</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.3</a> on Sun Jul 28 2024 15:26:32 GMT+0700 (Western Indonesia Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

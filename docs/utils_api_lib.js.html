@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: utils/api_lib.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: utils/api_lib.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @file api_lib.js
+ * @module api_lib
+ * @description Kumpulan fungsi untuk melakukan permintaan API ke server lokal.
+ */
+
+/**
+ * Melakukan permintaan POST ke API.
+ * @async
+ * @function postApiRes
+ * @param {string} resource - Sumber daya API yang akan diakses.
+ * @param {Object} value - Data yang akan dikirim dalam permintaan POST.
+ * @returns {Promise&lt;Object>} Hasil respon dari API dalam bentuk JSON.
+ */
+export const postApiRes = async ( resource, value ) => {
+    const response = await fetch(`http://localhost:3000/api/${resource}`, {
+        method: 'POST',
+        body: JSON.stringify(value),
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    });
+    const data = await response.json();
+    return data
+}
+
+/**
+ * Melakukan permintaan PATCH ke API.
+ * @async
+ * @function patchApiRes
+ * @param {string} resource - Sumber daya API yang akan diakses.
+ * @param {Object} value - Data yang akan dikirim dalam permintaan PATCH.
+ * @returns {Promise&lt;Object>} Hasil respon dari API dalam bentuk JSON.
+ */
+export const patchApiRes = async ( resource, value ) => {
+    const response = await fetch(`http://localhost:3000/api/${resource}`, {
+        method: 'PATCH',
+        body: JSON.stringify(value),
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    });
+    const data = await response.json();
+    return data
+}
+
+/**
+ * Melakukan permintaan DELETE ke API.
+ * @async
+ * @function deleteApiRes
+ * @param {string} resource - Sumber daya API yang akan diakses.
+ * @param {Object} value - Data yang akan dikirim dalam permintaan DELETE.
+ * @returns {Promise&lt;Object>} Hasil respon dari API dalam bentuk JSON.
+ */
+export const deleteApiRes = async ( resource, value ) => {
+    const response = await fetch(`http://localhost:3000/api/${resource}`, {
+        method: 'DELETE',
+        body: JSON.stringify(value),
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    });
+    const data = await response.json();
+    return data
+}
+
+/**
+ * Melakukan permintaan GET ke API.
+ * @async
+ * @function getApiRes
+ * @param {string} resource - Sumber daya API yang akan diakses.
+ * @returns {Promise&lt;Object>} Hasil respon dari API dalam bentuk JSON.
+ */
+export const getApiRes = async ( resource ) => {
+    const response = await fetch(`http://localhost:3000/api/${resource}`, {
+        method: "GET"
+    })
+
+    const data = await response.json();
+    return data
+}</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-DashboardAdmin.html">DashboardAdmin</a></li><li><a href="module-DashboardPelanggan.html">DashboardPelanggan</a></li><li><a href="module-DataAdmin.html">DataAdmin</a></li><li><a href="module-DataPelanggan.html">DataPelanggan</a></li><li><a href="module-DataPenggunaan.html">DataPenggunaan</a></li><li><a href="module-DataTagihan.html">DataTagihan</a></li><li><a href="module-Home.html">Home</a></li><li><a href="module-KelolaPembayaran.html">KelolaPembayaran</a></li><li><a href="module-KelolaTagihan.html">KelolaTagihan</a></li><li><a href="module-LoginAdmin.html">LoginAdmin</a></li><li><a href="module-LoginPelanggan.html">LoginPelanggan</a></li><li><a href="module-RiwayatPembayaran.html">RiwayatPembayaran</a></li><li><a href="module-RootLayout.html">RootLayout</a></li><li><a href="module-addKelolaAdmin.html">addKelolaAdmin</a></li><li><a href="module-addKelolaLevel.html">addKelolaLevel</a></li><li><a href="module-addKelolaPelanggan.html">addKelolaPelanggan</a></li><li><a href="module-addKelolaPenggunaan.html">addKelolaPenggunaan</a></li><li><a href="module-addKelolaTarif.html">addKelolaTarif</a></li><li><a href="module-api_lib.html">api_lib</a></li><li><a href="module-level.html">level</a></li><li><a href="module-supabase.html">supabase</a></li><li><a href="module-tarif.html">tarif</a></li></ul><h3>Global</h3><ul><li><a href="global.html#DELETE">DELETE</a></li><li><a href="global.html#EditAdmin">EditAdmin</a></li><li><a href="global.html#EditLevel">EditLevel</a></li><li><a href="global.html#EditPelanggan">EditPelanggan</a></li><li><a href="global.html#EditPenggunaan">EditPenggunaan</a></li><li><a href="global.html#EditTagihan">EditTagihan</a></li><li><a href="global.html#EditTarif">EditTarif</a></li><li><a href="global.html#GET">GET</a></li><li><a href="global.html#PATCH">PATCH</a></li><li><a href="global.html#POST">POST</a></li><li><a href="global.html#SideBarAdmin">SideBarAdmin</a></li><li><a href="global.html#SideBarPelanggan">SideBarPelanggan</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.3</a> on Sun Jul 28 2024 15:26:32 GMT+0700 (Western Indonesia Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

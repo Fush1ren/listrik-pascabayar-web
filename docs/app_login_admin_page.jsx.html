@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: app/login/admin/page.jsx</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: app/login/admin/page.jsx</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @module LoginAdmin
+ */
+
+'use client'
+import { postApiRes } from "@/utils/api_lib";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
+/**
+ * Komponen Login untuk melakukan autentikasi pengguna.
+ * @component
+ * @returns {JSX.Element} Komponen Login
+ */
+const LoginAdmin = () => {
+    const [username, setUsername] = useState('');
+    const [password, setPassword] = useState('');
+
+    const router = useRouter();
+    const storage = {
+        islogin: false,
+        level: 'admin'
+    }
+
+    /**
+     * Menghandle perubahan pada input username.
+     * @param {React.ChangeEvent&lt;HTMLInputElement>} e - Event perubahan input.
+     */
+    const usernameHandle = (e) => {
+        const value = e.target.value;
+        setUsername(value);
+    }
+
+    /**
+     * Menghandle perubahan pada input password.
+     * @param {React.ChangeEvent&lt;HTMLInputElement>} e - Event perubahan input.
+     */
+    const passwordHandle = (e) => {
+        const value = e.target.value;
+        setPassword(value);
+    }
+
+    /**
+     * Menampilkan notifikasi sukses login.
+     */
+    function SuccessAlert() {
+        toast.success('Login Successfully!', {
+            position: "top-center",
+            autoClose: 1000,
+            hideProgressBar: true,
+            theme: "colored",
+            closeOnClick: true
+        });
+    }
+
+    /**
+     * Menampilkan notifikasi gagal login.
+     */
+    function FailedAlert() {
+        toast.warning('Username or Password is wrong!', {
+            position: "top-center",
+            autoClose: 1000,
+            hideProgressBar: true,
+            theme: "colored",
+            closeOnClick: true
+        })
+    }
+
+    /**
+     * Menghandle submit form login.
+     * @param {React.FormEvent&lt;HTMLFormElement>} e - Event submit form.
+     */
+    const submitHandle = async (e) => {
+        e.preventDefault(); // mencegah reload halaman
+        try {
+            const value = {
+                username: username.toLowerCase(), // input username diubah menjadi lowercase
+                password: password, // input password
+                level: 'admin' // level admin
+            }
+            const api = await postApiRes("/login", value); // mengirim data ke API
+            if (api.result.error.length > 0) return FailedAlert(); // menampilkan notifikasi gagal
+            SuccessAlert(); // menampilkan notifikasi sukses
+            storage.data = api?.result?.data[0]; // menyimpan data pengguna
+            storage.islogin = true; // status login
+
+            localStorage.setItem('dataUser', JSON.stringify(storage)) // menyimpan data pengguna ke local storage
+            setInterval(() => {
+                router.push(`/admin/dashboard`) // pindah ke halaman dashboard admin
+            }, 2000);
+        } catch (e) {
+            console.log(e) // menampilkan error
+        }
+    }
+
+    useEffect(() => {
+        localStorage.setItem('dataUser', JSON.stringify(storage))
+    }, [])
+
+    return (
+        &lt;div className="flex bg-[#c7c7c5] text-black w-full bg- h-screen justify-center items-center ">
+            &lt;ToastContainer
+                position="top-center"
+                autoClose={3000}
+                hideProgressBar={true}
+                theme="colored"
+                closeOnClick={true}
+            />
+            &lt;div className="w-[380px] h-[380px] bg-white rounded border justify-center items-center px-5 py-4">
+                &lt;div className=" flex flex-col border-b border-gray-500 text-center pt-5">
+                    &lt;a className="text-black text-xl font-semibold">Welcome Back to&lt;/a>
+                    &lt;a className="text-blue-400 text-lg font-bold">ElecBill&lt;/a>
+                    &lt;a className="text-gray-400 text-sm font-medium">Login to your account&lt;/a>
+                &lt;/div>
+                &lt;form onSubmit={submitHandle} method="POST">
+                    &lt;div className="flex flex-col gap-4 py-2">
+                        &lt;div className="flex flex-col focus-within:scale-105 focus-within:duration-500 px-3">
+                            &lt;label className="text-sm">Username&lt;/label>
+                            &lt;input type="text" className="w-[200px ] outline-none bg-transparent border-b border-blue-500 p-1" value={username} onChange={usernameHandle} />
+                        &lt;/div>
+                        &lt;div className="flex flex-col focus-within:scale-105 focus-within:duration-500 px-3">
+                            &lt;label className="text-sm">Password&lt;/label>
+                            &lt;input type="password" className="w-[200px ] outline-none bg-transparent border-b border-blue-500 p-1" value={password} onChange={passwordHandle} />
+                        &lt;/div>
+                    &lt;/div>
+                    &lt;div className="p-4 ">
+                        &lt;button className=" w-full border hover:bg-blue-700 bg-transparent border-blue-700 p-2" type="submit" >Login&lt;/button>
+                    &lt;/div>
+                &lt;/form>
+                &lt;div className="flex justify-center items-center">
+                    &lt;a className="text-sm text-center hover:text-blue-500 hover:underline" href="/login/user">
+                        Login User
+                    &lt;/a>
+                &lt;/div>
+            &lt;/div>
+        &lt;/div>
+    )
+}
+
+export default LoginAdmin;</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-DashboardAdmin.html">DashboardAdmin</a></li><li><a href="module-DashboardPelanggan.html">DashboardPelanggan</a></li><li><a href="module-DataAdmin.html">DataAdmin</a></li><li><a href="module-DataPelanggan.html">DataPelanggan</a></li><li><a href="module-DataPenggunaan.html">DataPenggunaan</a></li><li><a href="module-DataTagihan.html">DataTagihan</a></li><li><a href="module-Home.html">Home</a></li><li><a href="module-KelolaPembayaran.html">KelolaPembayaran</a></li><li><a href="module-KelolaTagihan.html">KelolaTagihan</a></li><li><a href="module-LoginAdmin.html">LoginAdmin</a></li><li><a href="module-LoginPelanggan.html">LoginPelanggan</a></li><li><a href="module-RiwayatPembayaran.html">RiwayatPembayaran</a></li><li><a href="module-RootLayout.html">RootLayout</a></li><li><a href="module-addKelolaAdmin.html">addKelolaAdmin</a></li><li><a href="module-addKelolaLevel.html">addKelolaLevel</a></li><li><a href="module-addKelolaPelanggan.html">addKelolaPelanggan</a></li><li><a href="module-addKelolaPenggunaan.html">addKelolaPenggunaan</a></li><li><a href="module-addKelolaTarif.html">addKelolaTarif</a></li><li><a href="module-api_lib.html">api_lib</a></li><li><a href="module-level.html">level</a></li><li><a href="module-supabase.html">supabase</a></li><li><a href="module-tarif.html">tarif</a></li></ul><h3>Global</h3><ul><li><a href="global.html#DELETE">DELETE</a></li><li><a href="global.html#EditAdmin">EditAdmin</a></li><li><a href="global.html#EditLevel">EditLevel</a></li><li><a href="global.html#EditPelanggan">EditPelanggan</a></li><li><a href="global.html#EditPenggunaan">EditPenggunaan</a></li><li><a href="global.html#EditTagihan">EditTagihan</a></li><li><a href="global.html#EditTarif">EditTarif</a></li><li><a href="global.html#GET">GET</a></li><li><a href="global.html#PATCH">PATCH</a></li><li><a href="global.html#POST">POST</a></li><li><a href="global.html#SideBarAdmin">SideBarAdmin</a></li><li><a href="global.html#SideBarPelanggan">SideBarPelanggan</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.3</a> on Sun Jul 28 2024 15:26:32 GMT+0700 (Western Indonesia Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

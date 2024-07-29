@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: app/admin/tarif/page.jsx</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: app/admin/tarif/page.jsx</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @file /admin/tarif/page.js
+ * @module tarif
+ * @description Komponen untuk mengelola data tarif listrik.
+ */
+
+'use client'
+
+import { useEffect, useState } from "react"
+import { deleteApiRes, getApiRes, patchApiRes } from "@/utils/api_lib"
+import { redirect, useRouter, useSearchParams } from "next/navigation";
+import SideBar from "@/app/_components/admin/SideBar";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import EditTarif from "@/app/_components/admin/EditTarif";
+
+/**
+ * Komponen untuk mengelola tarif.
+ * @returns {JSX.Element} Elemen JSX yang mewakili halaman pengelolaan tarif.
+ */
+const tarif = () => {
+    const [dataTarif, setTarif] = useState([]);
+    const [selectedData, setSelectedData] = useState([]);
+    const [modalEdit, setModalEdit] = useState(false);
+
+
+    const router = useRouter();
+
+    /**
+     * Mengambil data tarif dari API.
+     * @async
+     * @function
+     * @returns {Promise&lt;void>}
+     */
+    const getTarif = async () => {
+        const api = await getApiRes(`/tarif`);
+        if (api.result.error.length > 0) return console.log(api.result.error);
+        return setTarif(api?.result?.data);
+    }
+
+    /**
+     * Mengatur data yang dipilih untuk diedit dan membuka modal edit.
+     * @param {Object} item - Data tarif yang dipilih.
+     */
+    const handleEditButton = (item) => {
+        setSelectedData(item);
+        setModalEdit(true);
+    }
+
+    /**
+     * Mengonversi nilai integer ke dalam format mata uang Rupiah.
+     * @param {number} value - Nilai yang akan dikonversi.
+     * @returns {string} Nilai dalam format mata uang Rupiah.
+     */
+    function integerToRupiah(value) {
+        return new Intl.NumberFormat('id-ID', {
+            style: 'currency',
+            currency: 'IDR'
+        }).format(value)
+    }
+
+
+    /**
+     * Mengirimkan data edit tarif ke API.
+     * @async
+     * @function
+     * @param {number} data - ID tarif yang akan diedit.
+     * @param {Object} value - Data yang akan dikirimkan.
+     * @returns {Promise&lt;void>}
+     */
+    const submitEditButton = async (data, value) => {
+        try {
+            const api = await patchApiRes(`/tarif?id_tarif=${parseInt(data)}`, value);
+
+            if (api.result.error.length > 0) return console.log(api.result.error);
+            toast.success('Update Data was Successfully!', {
+                position: "top-center",
+                autoClose: 500,
+                hideProgressBar: true,
+                theme: "colored",
+                closeOnClick: true
+            })
+            setModalEdit(false)
+            setTimeout(() => {
+                window.location.reload();
+            }, 2000);
+
+        } catch (e) {
+            console.log(e)
+        }
+    }
+
+    /**
+     * Mengarahkan pengguna ke halaman tambah tarif.
+     */
+    const handleTambahButton = () => {
+        router.push(`/admin/tarif/add`);
+    }
+
+    /**
+     * Menghapus data tarif dari API.
+     * @async
+     * @function
+     * @param {number} id_tarif - ID tarif yang akan dihapus.
+     * @returns {Promise&lt;void>}
+     */
+    const handleDeleteButton = async (id_tarif) => {
+        let text = "Apakah anda yakin ingin menghapus data?\nTekan OK atau Cancel."
+
+        if (confirm(text) == true) {
+            try {
+                const api = await deleteApiRes(`/tarif?id_tarif=${id_tarif}`);
+                if (api.result.error.length > 0) return console.log(api.result.error);
+                toast.success('Delete Data was Successfully!', {
+                    position: "top-center",
+                    autoClose: 500,
+                    hideProgressBar: true,
+                    theme: "colored",
+                    closeOnClick: true
+                })
+
+                setTimeout(() => {
+                    return window.location.reload();
+                }, 1000);
+            } catch (e) {
+                console.log(e);
+            }
+        } else {
+            return;
+        }
+    }
+
+    useEffect(() => {
+        const storage = JSON.parse(localStorage.getItem('dataUser'))
+        if (storage?.islogin === true &amp;&amp; storage?.level === 'admin') {
+            getTarif()
+        } else {
+            redirect('/login/admin')
+        }
+
+    }, [])
+
+
+    return (
+        &lt;div className="flex bg-[#F8F8F8] w-full h-screen">
+            &lt;SideBar />
+            &lt;div className="w-full text-[#6B6B6B] h-full">
+                &lt;ToastContainer
+                    position="top-center"
+                    autoClose={2000}
+                    hideProgressBar={true}
+                    theme="colored"
+                    closeOnClick={true}
+                />
+                &lt;div className="p-8 h-full overflow-auto">
+                    &lt;div className="flex pb-2 justify-between">
+                        &lt;h1 className="text-2xl font-bold">Kelola Tarif&lt;/h1>
+                        &lt;button className="bg-blue-400 hover:bg-blue-500 rounded" onClick={(e) => { handleTambahButton() }}>
+                            &lt;span className="text-white p-4">Tambah Data&lt;/span>
+                        &lt;/button>
+                    &lt;/div>
+                    &lt;div className="">
+                        &lt;table className="w-full border-collapse py-2 overflow-auto rounded-l-full">
+                            &lt;thead>
+                                &lt;tr className="border-2 text-white">
+                                    &lt;th className="py-4 bg-[#451CB8]">No&lt;/th>
+                                    &lt;th className="py-4 bg-[#451CB8]">Daya&lt;/th>
+                                    &lt;th className="py-4 bg-[#451CB8]">Tarif per kwh&lt;/th>
+                                    &lt;th className="py-4 bg-[#451CB8]">Action&lt;/th>
+                                &lt;/tr>
+                            &lt;/thead>
+                            &lt;tbody className="text-center">
+                                {
+                                    dataTarif?.map((item, index) => {
+                                        return (
+                                            &lt;tr key={index} className=" odd:bg-white even:bg-[#E7E9EB]">
+                                                &lt;td>{index + 1}&lt;/td>
+                                                &lt;td>{item?.daya}VA&lt;/td>
+                                                &lt;td>{integerToRupiah(item?.tarifperkwh)}&lt;/td>
+                                                &lt;td>
+                                                    &lt;div className="flex justify-center items-center gap-1">
+                                                        &lt;button onClick={() => { handleEditButton(item) }} className="bg-green-400 rounded hover:bg-green-500">
+                                                            &lt;span className="text-white p-2">Edit&lt;/span>
+                                                        &lt;/button>
+                                                        &lt;span className="text-gray-400">/&lt;/span>
+                                                        &lt;button className="bg-red-400 rounded hover:bg-red-500" onClick={() => handleDeleteButton(item?.id_tarif)}>
+                                                            &lt;span className="text-white p-2">Delete&lt;/span>
+                                                        &lt;/button>
+                                                    &lt;/div>
+                                                &lt;/td>
+                                            &lt;/tr>
+                                        )
+                                    })
+                                }
+                            &lt;/tbody>
+                        &lt;/table>
+                    &lt;/div>
+                &lt;/div>
+                {
+                    modalEdit &amp;&amp;
+                    &lt;EditTarif data={selectedData} setModalEdit={() => { setModalEdit(false) }} submitEditButton={submitEditButton} />
+                }
+            &lt;/div>
+        &lt;/div>
+    )
+
+}
+
+export default tarif;</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-DashboardAdmin.html">DashboardAdmin</a></li><li><a href="module-DashboardPelanggan.html">DashboardPelanggan</a></li><li><a href="module-DataAdmin.html">DataAdmin</a></li><li><a href="module-DataPelanggan.html">DataPelanggan</a></li><li><a href="module-DataPenggunaan.html">DataPenggunaan</a></li><li><a href="module-DataTagihan.html">DataTagihan</a></li><li><a href="module-Home.html">Home</a></li><li><a href="module-KelolaPembayaran.html">KelolaPembayaran</a></li><li><a href="module-KelolaTagihan.html">KelolaTagihan</a></li><li><a href="module-LoginAdmin.html">LoginAdmin</a></li><li><a href="module-LoginPelanggan.html">LoginPelanggan</a></li><li><a href="module-RiwayatPembayaran.html">RiwayatPembayaran</a></li><li><a href="module-RootLayout.html">RootLayout</a></li><li><a href="module-addKelolaAdmin.html">addKelolaAdmin</a></li><li><a href="module-addKelolaLevel.html">addKelolaLevel</a></li><li><a href="module-addKelolaPelanggan.html">addKelolaPelanggan</a></li><li><a href="module-addKelolaPenggunaan.html">addKelolaPenggunaan</a></li><li><a href="module-addKelolaTarif.html">addKelolaTarif</a></li><li><a href="module-api_lib.html">api_lib</a></li><li><a href="module-level.html">level</a></li><li><a href="module-supabase.html">supabase</a></li><li><a href="module-tarif.html">tarif</a></li></ul><h3>Global</h3><ul><li><a href="global.html#DELETE">DELETE</a></li><li><a href="global.html#EditAdmin">EditAdmin</a></li><li><a href="global.html#EditLevel">EditLevel</a></li><li><a href="global.html#EditPelanggan">EditPelanggan</a></li><li><a href="global.html#EditPenggunaan">EditPenggunaan</a></li><li><a href="global.html#EditTagihan">EditTagihan</a></li><li><a href="global.html#EditTarif">EditTarif</a></li><li><a href="global.html#GET">GET</a></li><li><a href="global.html#PATCH">PATCH</a></li><li><a href="global.html#POST">POST</a></li><li><a href="global.html#SideBarAdmin">SideBarAdmin</a></li><li><a href="global.html#SideBarPelanggan">SideBarPelanggan</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.3</a> on Sun Jul 28 2024 15:26:32 GMT+0700 (Western Indonesia Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

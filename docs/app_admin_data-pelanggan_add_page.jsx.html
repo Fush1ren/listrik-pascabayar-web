@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: app/admin/data-pelanggan/add/page.jsx</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: app/admin/data-pelanggan/add/page.jsx</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @file /admin/data-pelanggan/add/page.js
+ * @module addKelolaPelanggan
+ * @description Komponen untuk menambah data pelanggan baru.
+ */
+
+
+'use client'
+
+import SideBar from "@/app/_components/admin/SideBar";
+import { getApiRes, postApiRes } from "@/utils/api_lib";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
+/**
+ * Komponen addDataPelanggan.
+ * Menampilkan form untuk menambah data pelanggan baru.
+ * @returns {JSX.Element} Elemen JSX yang menampilkan form tambah data pelanggan.
+ */
+const addDataPelanggan = () => {
+    const [username, setUsername] = useState('');
+    const [password, setPassword] = useState('');
+    const [namaPelanggan, setNamaPelanggan] = useState('');
+    const [nomorKwh, setNomorKwh] = useState('');
+    const [alamat, setAlamat] = useState('');
+    const [tarif, setTarif] = useState([]);
+    const [daya, setDaya] = useState(0);
+
+    const router = useRouter();
+
+    /**
+     * Mengubah nilai username.
+     * @param {Object} e - Event dari input username.
+     */
+    const handleUsernameChange = (e) => {
+        setUsername(e.target.value);
+    };
+
+    /**
+     * Mengubah nilai password.
+     * @param {Object} e - Event dari input password.
+     */
+    const handlePasswordChange = (e) => {
+        setPassword(e.target.value);
+    };
+
+    /**
+     * Mengubah nilai nama pelanggan.
+     * @param {Object} e - Event dari input nama pelanggan.
+     * 
+     */
+    const handleNamaPelangganChange = (e) => {
+        setNamaPelanggan(e.target.value);
+    };
+
+    /**
+     * Mengubah nilai alamat.
+     * @param {Object} e - Event dari input alamat.
+     */
+    const handleAlamatChange = (e) => {
+        setAlamat(e.target.value);
+    };
+
+    /**
+     * Mengubah nilai nomor Kwh.
+     * @param {Object} e - Event dari input nomor Kwh.
+     */
+    const handleNomorKwhChange = (e) => {
+        setNomorKwh(e.target.value);
+    };
+
+    /**
+     * Mengubah nilai daya.
+     * @param {Object} e - Event dari input daya.
+     */
+    const handleDayaChange = (e) => {
+        setDaya(e.target.value);
+    };
+
+    /**
+     * Mereset nilai input.
+     */
+    const handleReset = () => {
+        setUsername('')
+        setPassword('')
+        setNamaPelanggan('')
+        setNomorKwh('')
+        setAlamat('')
+        setDaya(daya)
+    }
+
+    /**
+     * Mengambil data tarif dari API.
+     * @async
+     */
+    const getTarif = async () => {
+        try {
+            const api = await getApiRes(`/tarif`);
+            if (api.result.error.length > 0) return console.log(api.result.error);
+            setTarif(api?.result?.data)
+        } catch (e) {
+            throw (e);
+        }
+    }
+
+    /**
+     * Mengirim data pelanggan baru ke API.
+     * @param {Object} e - Event dari submit form.
+     * @async
+     */
+    const submitForm = async (e) => {
+        e.preventDefault();
+        let newDaya = tarif[daya].id_tarif;
+        try {
+            const value = {
+                username: username.toLowerCase(),
+                password: password,
+                nama_pelanggan: namaPelanggan,
+                nomor_kwh: nomorKwh,
+                alamat: alamat,
+                id_tarif: parseInt(newDaya)
+            }
+            const api = await postApiRes(`/pelanggan`, value);
+
+            if (api.result.error.length > 0) return console.log(api.result.error);
+            toast.success('Insert Data was Successfully!', {
+                position: "top-center",
+                autoClose: 1000,
+                hideProgressBar: true,
+                theme: "colored",
+                closeOnClick: true
+            })
+
+            setTimeout(() => {
+                router.push(`/admin/data-pelanggan`)
+            }, 2000);
+
+        } catch (e) {
+            throw (e)
+        }
+    }
+
+    useEffect(() => {
+        const storage = JSON.parse(localStorage.getItem('dataUser'))
+        if (storage?.islogin === true &amp;&amp; storage?.level === 'admin') {
+            getTarif()
+        } else {
+            redirect('/login/admin')
+        }
+
+    }, [])
+
+
+
+
+    return (
+        &lt;div className="flex bg-[#F8F8F8] w-full h-screen">
+            &lt;SideBar />
+            &lt;div className="w-full text-[#6B6B6B] h-full">
+                &lt;div>
+                    &lt;ToastContainer
+                        position="top-center"
+                        autoClose={3000}
+                        hideProgressBar={true}
+                        theme="colored"
+                        closeOnClick={true}
+                    />
+                    &lt;div className={`p-8 h-[596px] overflow-auto`}>
+                        &lt;div className="pb-2">
+                            &lt;h1 className="text-2xl font-bold">Tambah Data Pelanggan&lt;/h1>
+                        &lt;/div>
+                        &lt;div className="w-full">
+                            &lt;form method="POST" onSubmit={submitForm}>
+                                &lt;div className="flex flex-row py-2 w-[600px] gap-8">
+                                    &lt;div className="flex flex-col py-2">
+                                        &lt;label>Username&lt;/label>
+                                        &lt;input value={username} onChange={handleUsernameChange} required type="text" className="text-black border border-black" />
+                                    &lt;/div>
+                                &lt;/div>
+                                &lt;div className="flex flex-row py-2 w-[600px] gap-8">
+                                    &lt;div className="flex flex-col py-2">
+                                        &lt;label>Password&lt;/label>
+                                        &lt;input value={password} onChange={handlePasswordChange} required type="password" className="text-black border border-black" />
+                                    &lt;/div>
+                                &lt;/div>
+                                &lt;div className="flex flex-row py-2 w-[600px] gap-8">
+                                    &lt;div className="flex flex-col py-2">
+                                        &lt;label>Nama Pelanggan&lt;/label>
+                                        &lt;input value={namaPelanggan} onChange={handleNamaPelangganChange} required type="text" className="text-black border border-black" />
+                                    &lt;/div>
+                                &lt;/div>
+                                &lt;div className="flex flex-row py-2 w-[600px] gap-8">
+                                    &lt;div className="flex flex-col py-2">
+                                        &lt;label>Nomor kWh&lt;/label>
+                                        &lt;input value={nomorKwh} onChange={handleNomorKwhChange} required type="text" className="text-black border border-black" />
+                                    &lt;/div>
+                                &lt;/div>
+                                &lt;div className="flex flex-row py-2 w-[600px] gap-8">
+                                    &lt;div className="flex flex-col py-2">
+                                        &lt;label>Alamat&lt;/label>
+                                        &lt;input value={alamat} onChange={handleAlamatChange} required type="text" className="text-black border border-black" />
+                                    &lt;/div>
+                                &lt;/div>
+                                &lt;div className="flex flex-row py-2 w-[600px] gap-8">
+                                    &lt;div className="flex flex-col py-2">
+                                        &lt;label>Daya&lt;/label>
+                                        &lt;select className="w-[200px] border border-black rounded" value={daya} required onChange={handleDayaChange}>
+                                            {
+                                                tarif?.map((item, index) => {
+                                                    return (
+                                                        &lt;option key={index} value={index}>
+                                                            {item?.daya}VA
+                                                        &lt;/option>
+                                                    )
+                                                })
+                                            }
+                                        &lt;/select>
+                                    &lt;/div>
+                                &lt;/div>
+                                &lt;div className="flex flex-row gap-4 py-4">
+                                    &lt;button type="submit" className="border bg-green-400 rounded hover:bg-green-500">
+                                        &lt;span className="text-white p-4">Submit&lt;/span>
+                                    &lt;/button>
+                                    &lt;button onClick={handleReset} type="reset" className="border bg-red-400 rounded hover:bg-red-500 bg-5">
+                                        &lt;span className="text-white p-4">Reset&lt;/span>
+                                    &lt;/button>
+                                &lt;/div>
+                            &lt;/form>
+                        &lt;/div>
+                    &lt;/div>
+                &lt;/div>
+            &lt;/div>
+        &lt;/div>
+    )
+}
+
+export default addDataPelanggan;</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-DashboardAdmin.html">DashboardAdmin</a></li><li><a href="module-DashboardPelanggan.html">DashboardPelanggan</a></li><li><a href="module-DataAdmin.html">DataAdmin</a></li><li><a href="module-DataPelanggan.html">DataPelanggan</a></li><li><a href="module-DataPenggunaan.html">DataPenggunaan</a></li><li><a href="module-DataTagihan.html">DataTagihan</a></li><li><a href="module-Home.html">Home</a></li><li><a href="module-KelolaPembayaran.html">KelolaPembayaran</a></li><li><a href="module-KelolaTagihan.html">KelolaTagihan</a></li><li><a href="module-LoginAdmin.html">LoginAdmin</a></li><li><a href="module-LoginPelanggan.html">LoginPelanggan</a></li><li><a href="module-RiwayatPembayaran.html">RiwayatPembayaran</a></li><li><a href="module-RootLayout.html">RootLayout</a></li><li><a href="module-addKelolaAdmin.html">addKelolaAdmin</a></li><li><a href="module-addKelolaLevel.html">addKelolaLevel</a></li><li><a href="module-addKelolaPelanggan.html">addKelolaPelanggan</a></li><li><a href="module-addKelolaPenggunaan.html">addKelolaPenggunaan</a></li><li><a href="module-addKelolaTarif.html">addKelolaTarif</a></li><li><a href="module-api_lib.html">api_lib</a></li><li><a href="module-level.html">level</a></li><li><a href="module-supabase.html">supabase</a></li><li><a href="module-tarif.html">tarif</a></li></ul><h3>Global</h3><ul><li><a href="global.html#DELETE">DELETE</a></li><li><a href="global.html#EditAdmin">EditAdmin</a></li><li><a href="global.html#EditLevel">EditLevel</a></li><li><a href="global.html#EditPelanggan">EditPelanggan</a></li><li><a href="global.html#EditPenggunaan">EditPenggunaan</a></li><li><a href="global.html#EditTagihan">EditTagihan</a></li><li><a href="global.html#EditTarif">EditTarif</a></li><li><a href="global.html#GET">GET</a></li><li><a href="global.html#PATCH">PATCH</a></li><li><a href="global.html#POST">POST</a></li><li><a href="global.html#SideBarAdmin">SideBarAdmin</a></li><li><a href="global.html#SideBarPelanggan">SideBarPelanggan</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.3</a> on Sun Jul 28 2024 15:26:32 GMT+0700 (Western Indonesia Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
